@@ -407,29 +407,47 @@ function BitmapData(width, height, transparent, fillColor, canvas) {
 	};
 	
 	this.copyChannel = function(sourceBitmapData, sourceRect, destPoint, sourceChannel, destChannel) {
-		var sourceColor, sourceRGB, rgb;
-		var redChannel = BitmapDataChannel.RED;
-		var greenChannel = BitmapDataChannel.GREEN;
-		var blueChannel = BitmapDataChannel.BLUE;
+		var sourceOffset = 0;
+		var destOffset = 0;
 		
+		switch(sourceChannel){
+		    case 1:
+		        sourceOffset = 0;
+		        break;
+		    case 2:
+		        sourceOffset = 1;
+		        break;
+		    case 4:
+		        sourceOffset = 2;
+		        break;
+		    case 8:
+		        sourceOffset = 3;
+		        break;
+		}
+		
+		switch(destChannel){
+		    case 1:
+		        destOffset = 0;
+		        break;
+		    case 2:
+		        destOffset = 1;
+		        break;
+		    case 4:
+		        destOffset = 2;
+		        break;
+		    case 8:
+		        destOffset = 3;
+		        break;
+		}
+		
+		var sourcepos;
+                var sourcedata = sourceBitmapData.imagedata.data;
+		var data = this.imagedata.data;
 		for (var y=0; y<sourceRect.height; y++) {
 			for (var x=0; x<sourceRect.width; x++) {
-				sourceColor = sourceBitmapData.getPixel(sourceRect.x+x, sourceRect.y+y);
-				sourceRGB = hexToRGB(sourceColor);
-				switch(sourceChannel) {
-					case redChannel: channelValue = sourceRGB.r; break;
-					case greenChannel: channelValue = sourceRGB.g; break;
-					case blueChannel: channelValue = sourceRGB.b; break;
-				}
-				
-				rgb = hexToRGB( this.getPixel(destPoint.x+x, destPoint.y+y) ); // redundancy
-				switch(destChannel){
-					case redChannel: rgb.r = channelValue; break;
-					case greenChannel: rgb.g = channelValue; break;
-					case blueChannel: rgb.b = channelValue; break;
-				}
-				
-				this.setPixel(destPoint.x+x, destPoint.y+y, RGBToHex(rgb));
+			    sourcepos = (x + y * sourceRect.width) * 4;
+			    pos = ((destPoint.x + x) + (destPoint.y + y * this.width)) * 4;
+        		    data[pos+destOffset] = sourcedata[sourcepos+sourceOffset];
 			}
 		}
 		
